@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     using Counters for Counters.Counter;
+
     Counters.Counter private _tokenIdCounter;
 
     // Event for deposit
@@ -40,39 +41,19 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     uint256 public constant BLI = 0;
 
     // 등급별 수수료 비율
-    uint256 public NoobFeeRatio; // 0.15
-    uint256 public RookieFeeRatio; // 0.13
-    uint256 public MemberFeeRatio; // 0.11
-    uint256 public BronzeFeeRatio; // 0.09
-    uint256 public SilverFeeRatio; // 0.0
-    uint256 public GoldFeeRatio; // 0.05
-    uint256 public PlatinumFeeRatio; // 0.03
-    uint256 public DiamondFeeRatio; // 0.01
+    uint256 public NoobFeeRatio = 10;
+    uint256 public RookieFeeRatio = 9;
+    uint256 public MemberFeeRatio = 8;
+    uint256 public BronzeFeeRatio = 7;
+    uint256 public SilverFeeRatio = 6;
+    uint256 public GoldFeeRatio = 5;
+    uint256 public PlatinumFeeRatio = 4;
+    uint256 public DiamondFeeRatio = 3;
 
     // 수수료 수익 총계 -> 컨트랙트가 가지고 있는 수수료
     uint256 private FeeRevenues;
 
-    constructor(
-        // 등급별 수수료 비율
-        uint256 _noob_fee_ratio, // 0.10
-        uint256 _rookie_fee_ratio, // 0.9
-        uint256 _member_fee_ratio, // 0.8
-        uint256 _bronze_fee_ratio, // 0.7
-        uint256 _silver_fee_ratio, // 0.6
-        uint256 _gold_fee_ratio, // 0.5
-        uint256 _platinum_fee_ratio, // 0.4
-        uint256 _diamond_fee_ratio // 0.3
-    ) ERC1155("http://BlindMarket.xyz/{id}.json") {
-        // 등급별 수수료 비율
-        NoobFeeRatio = _noob_fee_ratio; // 0.10
-        RookieFeeRatio = _rookie_fee_ratio; // 0.9
-        MemberFeeRatio = _member_fee_ratio; // 0.8
-        BronzeFeeRatio = _bronze_fee_ratio; // 0.7
-        SilverFeeRatio = _silver_fee_ratio; // 0.6
-        GoldFeeRatio = _gold_fee_ratio; // 0.5
-        PlatinumFeeRatio = _platinum_fee_ratio; // 0.4
-        DiamondFeeRatio = _diamond_fee_ratio; // 0.3
-
+    constructor() ERC1155("http://BlindMarket.xyz/{id}.json") {
         _tokenIdCounter.increment();
         FeeRevenues = 0;
     }
@@ -215,7 +196,8 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         returns (uint256)
     {
         return
-            Trade[tokenId].price / getRatioByGrade(UserInfo[user].grade) / 1000;
+            (Trade[tokenId].price * getRatioByGrade(UserInfo[user].grade)) /
+            100000;
     }
 
     // 거래 금액에 비례해서 거버넌스 토큰 발행
@@ -277,7 +259,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         Grade _sellerGrade = UserInfo[msg.sender].grade;
         uint256 _feeRatio = getRatioByGrade(_sellerGrade);
 
-        return Trade[tokenId].price * _feeRatio;
+        return (Trade[tokenId].price * _feeRatio) / 100;
     }
 
     // 회원가입 시 유저의 정보를 테이블에 추가하는 함수
