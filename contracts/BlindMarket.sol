@@ -177,7 +177,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         uint256 id,
         uint256 amount,
         bytes memory data
-    ) public onlyOwner {
+    ) internal {
         _mint(account, id, amount, data);
     }
 
@@ -247,13 +247,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         require(
             Trade[tokenId].phase != Phase.invalid,
             "Must exist in trade table"
-        );
-
-        // Sender must be seller.
-        require(
-            keccak256(bytes(UserInfo[msg.sender].nickname)) ==
-                keccak256(bytes(Trade[tokenId].seller)),
-            "Sender must be seller."
         );
 
         Grade _sellerGrade = UserInfo[msg.sender].grade;
@@ -453,6 +446,14 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         // Update users grade
         updateUserGrade(Trade[tokenId].sellerAddress);
         updateUserGrade(Trade[tokenId].buyerAddress);
+
+        safeTransferFrom(
+            Trade[tokenId].sellerAddress,
+            Trade[tokenId].buyerAddress,
+            tokenId,
+            1,
+            ""
+        );
 
         emit FinishPurchaseRequest(
             Trade[tokenId].buyerAddress,
