@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     using Counters for Counters.Counter;
-
     Counters.Counter private _tokenIdCounter;
 
     // Event for deposit
