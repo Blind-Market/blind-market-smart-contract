@@ -452,11 +452,12 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     }
 
     // 구매 단계 (3) : 배송 완료시 거래를 Done 상태로 바꿔줌
-    function turnIntoDone(
-        uint256 tokenId,
-        uint256 index,
-        address payable seller
-    ) public payable isApproved returns (bool) {
+    function turnIntoDone(uint256 tokenId, uint256 index)
+        public
+        payable
+        isApproved
+        returns (bool)
+    {
         require(
             Trade[tokenId].phase == Phase.shipping,
             "The product is not arrived yet."
@@ -467,6 +468,9 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
                 keccak256(abi.encodePacked(Trade[tokenId].buyer)),
             "Caller is not the buyer."
         );
+
+        address payable _sellerAddress = Trade[tokenId].sellerAddress;
+        address payable _buyerAddress = Trade[tokenId].buyerAddress;
 
         // Change phase
         Trade[tokenId].phase = Phase.done;
@@ -480,14 +484,13 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         // Get fee
         FeeRevenues += _fee;
 
-        uint128 price;
-        decode(Trade[tokenId].hash);
+        (uint128 _usedBLI, uint128 price) = decode(Trade[tokenId].hash);
 
         // Transfer fee to smart contract
-        payable(address(this)).transfer(_fee);
+        // payable(address(this)).transfer(_fee);
 
         // Transfer price to seller
-        seller.transfer(price - _fee);
+        payable(_sellerAddress).transfer(price - _fee);
 
         // Update Phase
         TradeLogTable[UserInfo[msg.sender].nickname][index].phase = Phase.done;
@@ -495,23 +498,23 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
         // Mint Blind Token to buyer and seller
         uint256 AmountOfBuyer = estimateAmountOfBLI(
-            Trade[tokenId].buyerAddress,
+            payable(_buyerAddress),
             tokenId
         );
         uint256 AmountOfSeller = estimateAmountOfBLI(
-            Trade[tokenId].sellerAddress,
+            payable(_sellerAddress),
             tokenId
         );
-        mintBlindToken(Trade[tokenId].buyerAddress, AmountOfBuyer);
-        mintBlindToken(Trade[tokenId].sellerAddress, AmountOfSeller);
+        mintBlindToken(payable(_buyerAddress), AmountOfBuyer);
+        mintBlindToken(payable(_sellerAddress), AmountOfSeller);
 
         // Set users grade point
-        UserInfo[Trade[tokenId].sellerAddress].gradePoint += 1000;
-        UserInfo[Trade[tokenId].buyerAddress].gradePoint += 1000;
+        UserInfo[_sellerAddress].gradePoint += 1000;
+        UserInfo[_buyerAddress].gradePoint += 1000;
 
         // Update users grade
-        updateUserGrade(Trade[tokenId].sellerAddress);
-        updateUserGrade(Trade[tokenId].buyerAddress);
+        updateUserGrade(_sellerAddress);
+        updateUserGrade(_buyerAddress);
 
         // safeTransferFrom(
         //     Trade[tokenId].sellerAddress,
@@ -521,11 +524,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         //     ""
         // );
 
-        emit FinishPurchaseRequest(
-            tokenId,
-            Trade[tokenId].buyerAddress,
-            Trade[tokenId].sellerAddress
-        );
+        emit FinishPurchaseRequest(tokenId, _buyerAddress, _sellerAddress);
         return true;
     }
 
