@@ -14,8 +14,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
     // Event for deposit
     event PurchaseRequest(
-        // uint128 price,
-        // uint128 usedBLI,
         uint256 tokenId,
         address indexed buyer,
         address indexed seller
@@ -23,8 +21,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
     // Event for finish request.
     event FinishPurchaseRequest(
-        // uint128 price,
-        // uint128 usedBLI,
         uint256 tokenId,
         address indexed buyer,
         address indexed seller
@@ -89,8 +85,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
     // Struct for store user data
     struct Request {
-        // uint128 usedBLI;
-        // uint128 price;
         uint256 tokenId;
         bytes32 hash;
         string buyer;
@@ -372,7 +366,9 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         uint128 price,
         string memory seller,
         address sellerAddress
-    ) public isApproved returns (bool) {
+    ) public isApproved payable returns (bool) {
+
+        require(msg.value >= price, "The value you sent is lower than the price.");
         // Mutex Lock
         Lock(tokenId);
 
@@ -388,8 +384,8 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
             _hash,
             buyer,
             seller,
-            payable(msg.sender),
-            payable(sellerAddress),
+            msg.sender,
+            sellerAddress,
             Phase.pending
         );
 
@@ -408,22 +404,23 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         // Buyer Nickname
         string memory _seller = UserInfo[msg.sender].nickname;
         string memory _buyer = UserInfo[Trade[tokenId].buyerAddress].nickname;
+        Phase memory phase = Trade[tokenId].phase;
 
         // Only the request in pending phase can be shipping phase.
-        require(Trade[tokenId].phase == Phase.pending);
+        require(phase == Phase.pending, "Only the request in pending phase can be shipping phase.");
 
         // Sender's nickname should be same with the nickname which involved with the request.
         require(
             keccak256(abi.encodePacked(Trade[tokenId].seller)) ==
-                keccak256(abi.encodePacked(_seller))
+                keccak256(abi.encodePacked(_seller)), "Sender's nickname should be same with the nickname which involved with the request."
         );
 
         // Inputed BLI must be more than 0
-        require(usedBLI >= 0);
+        require(usedBLI >= 0, "Inputed BLI must be more than 0");
 
         // Inputed BLI must be less than fee
         uint256 _fee = estimateFee(tokenId);
-        require(usedBLI <= _fee);
+        require(usedBLI <= _fee, "Inputed BLI must be less than fee");
 
         // Change phase
         Trade[tokenId].phase = Phase.shipping;
@@ -486,9 +483,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
         (uint128 _usedBLI, uint128 price) = decode(Trade[tokenId].hash);
 
-        // Transfer fee to smart contract
-        // payable(address(this)).transfer(_fee);
-
         // Transfer price to seller
         payable(_sellerAddress).transfer(price - _fee);
 
@@ -516,14 +510,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         updateUserGrade(_sellerAddress);
         updateUserGrade(_buyerAddress);
 
-        // safeTransferFrom(
-        //     Trade[tokenId].sellerAddress,
-        //     Trade[tokenId].buyerAddress,
-        //     tokenId,
-        //     1,
-        //     ""
-        // );
-
         emit FinishPurchaseRequest(tokenId, _buyerAddress, _sellerAddress);
         return true;
     }
@@ -531,6 +517,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     // 구매 취소 : 거래가 취소되어 상태를 Canceled 상태로 바꾸고 NFT 토큰은 unlock
     function turnIntoCancel(uint256 tokenId, uint256 index)
         public
+        payable
         isApproved
         returns (bool)
     {
@@ -555,6 +542,9 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
         // Unlock Token
         Unlock(tokenId);
+        
+        (uint128 _usedBLI, uint128 price) = decode(Trade[tokenId].hash);
+        payable(msg.sender).transfer(price);
 
         return true;
     }
