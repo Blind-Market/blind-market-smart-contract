@@ -12,6 +12,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
     Counters.Counter private _tokenIdCounter;
 
+    /* Events */
     // Event for deposit
     event PurchaseRequest(
         uint256 tokenId,
@@ -49,9 +50,9 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     // Total fee revenue
     uint256 private FeeRevenues;
 
+    // constructor
     constructor() ERC1155("http://BlindMarket.xyz/{id}.json") {
         _tokenIdCounter.increment();
-        FeeRevenues = 0;
     }
 
     // Enum for user grade
@@ -79,19 +80,19 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     // Struct for store user data
     struct UserData {
         uint256 gradePoint;
-        string nickname;
         Grade grade;
+        string nickname;
     }
 
     // Struct for store user data
     struct Request {
         uint256 tokenId;
         bytes32 hash;
-        string buyer;
-        string seller;
+        Phase phase;
         address payable buyerAddress;
         address payable sellerAddress;
-        Phase phase;
+        string buyer;
+        string seller;
     }
 
     // Lock status of each NFT Token for product
@@ -171,53 +172,54 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     }
 
     // Mint NFT
-    function mintNFT(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) internal {
-        _mint(account, id, amount, data);
-    }
+    // function mintNFT(
+    //     address account,
+    //     uint256 id,
+    //     uint256 amount,
+    //     bytes memory data
+    // ) internal {
+    //     _mint(account, id, amount, data);
+    // }
 
     // Mint NFT Token for product
     function mintProduct(string memory uri) public isApproved {
+        require(UserInfo[msg.sender].grade != Grade.invalid);
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        mintNFT(msg.sender, tokenId, 1, "");
+        _mint(msg.sender, tokenId, 1, "");
+        // mintNFT(msg.sender, tokenId, 1, "");
         _setURI(tokenId, uri);
     }
 
-    // Estimate amount of Blind token by user grade and trade price.
+    // Estimate amount of Blind token should be minted by user grade and trade price.
     function estimateAmountOfBLI(address user, uint256 tokenId)
         public
         view
         isApproved
         returns (uint256)
     {
-        uint128 price;
-        decode(Trade[tokenId].hash);
+        (uint128 _usedBLI, uint128 _price) = decode(Trade[tokenId].hash);
+        _usedBLI = 0;
 
-        return (price * getRatioByGrade(UserInfo[user].grade)) / 100000;
+        return (_price * getRatioByGrade(UserInfo[user].grade)) / 100000;
         // return
         //     (Trade[tokenId].price * getRatioByGrade(UserInfo[user].grade)) /
         //     100000;
     }
 
     // Mint Blind token by user grade and trade price.
-    function mintBlindToken(address user, uint256 amount)
-        private
-        onlyOwner
+    function _mintBlindToken(address user, uint256 amount)
+        internal
         isApproved
     {
-        mintNFT(user, BLI, amount, "");
+        _mint(user, BLI, amount, "");
+        // mintNFT(user, BLI, amount, "");
     }
 
     // Get fee ratio by user grade.
     function getRatioByGrade(Grade grade)
         public
-        view
-        isApproved
+        pure
         returns (uint256)
     {
         if (grade == Grade.noob) {
@@ -248,20 +250,21 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         walletOwnerOrAdmin(msg.sender)
         returns (uint256)
     {
+        Request memory TradeInfo = Trade[tokenId];
+
         // Must exist in trade table.
         require(
-            Trade[tokenId].phase != Phase.invalid,
+            TradeInfo.phase != Phase.invalid,
             "Must exist in trade table"
         );
 
         Grade _sellerGrade = UserInfo[msg.sender].grade;
         uint256 _feeRatio = getRatioByGrade(_sellerGrade);
 
-        (uint128 usedBLI, uint128 price) = decode(Trade[tokenId].hash);
-
+        (uint128 usedBLI, uint128 _price) = decode(TradeInfo.hash);
         usedBLI = 0;
 
-        return (price * _feeRatio) / 100;
+        return (_price * _feeRatio) / 100;
         // return (Trade[tokenId].price * _feeRatio) / 100;
     }
 
@@ -284,7 +287,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         platinum : 1,000,001 ~ 2,000,000
         diamond : 2,000,001 ~ 
     */
-    function updateUserGrade(address user) internal {
+    function _updateUserGrade(address user) internal {
         require(UserInfo[user].grade != Grade.invalid);
 
         uint256 gp = UserInfo[user].gradePoint;
@@ -366,9 +369,11 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         uint128 price,
         string memory seller,
         address sellerAddress
-    ) public isApproved payable returns (bool) {
-
-        require(msg.value >= price, "The value you sent is lower than the price.");
+    ) public payable isApproved {
+        require(
+            msg.value >= price,
+            "The value you sent is lower than the price."
+        );
         // Mutex Lock
         Lock(tokenId);
 
@@ -376,23 +381,21 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         string memory buyer = UserInfo[msg.sender].nickname;
 
         bytes32 _hash = encode(0, price);
+
         // Push new request.
         Trade[tokenId] = Request(
             0,
-            // price,
-            // tokenId,
             _hash,
+            Phase.pending,
+            payable(msg.sender),
+            payable(sellerAddress),
             buyer,
-            seller,
-            msg.sender,
-            sellerAddress,
-            Phase.pending
+            seller
         );
 
         TradeLogTable[buyer].push(Trade[tokenId]);
         TradeLogTable[seller].push(Trade[tokenId]);
 
-        return true;
     }
 
     // 구매 단계 (2) : 판매 물품이 배송되고 있다는 Shipping 상태로 바꿔줌
@@ -400,19 +403,23 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         uint256 tokenId,
         uint256 index,
         uint128 usedBLI
-    ) public isApproved returns (bool) {
+    ) public isApproved  {
         // Buyer Nickname
         string memory _seller = UserInfo[msg.sender].nickname;
         string memory _buyer = UserInfo[Trade[tokenId].buyerAddress].nickname;
-        Phase memory phase = Trade[tokenId].phase;
+        Phase phase = Trade[tokenId].phase;
 
         // Only the request in pending phase can be shipping phase.
-        require(phase == Phase.pending, "Only the request in pending phase can be shipping phase.");
+        require(
+            phase == Phase.pending,
+            "Only the request in pending phase can be shipping phase."
+        );
 
         // Sender's nickname should be same with the nickname which involved with the request.
         require(
             keccak256(abi.encodePacked(Trade[tokenId].seller)) ==
-                keccak256(abi.encodePacked(_seller)), "Sender's nickname should be same with the nickname which involved with the request."
+                keccak256(abi.encodePacked(_seller)),
+            "Sender's nickname should be same with the nickname which involved with the request."
         );
 
         // Inputed BLI must be more than 0
@@ -421,7 +428,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         // Inputed BLI must be less than fee
         uint256 _fee = estimateFee(tokenId);
         require(usedBLI <= _fee, "Inputed BLI must be less than fee");
-
+ 
         // Change phase
         Trade[tokenId].phase = Phase.shipping;
 
@@ -444,8 +451,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
             1,
             ""
         );
-
-        return true;
     }
 
     // 구매 단계 (3) : 배송 완료시 거래를 Done 상태로 바꿔줌
@@ -453,41 +458,47 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         public
         payable
         isApproved
-        returns (bool)
+        
     {
         require(
             Trade[tokenId].phase == Phase.shipping,
             "The product is not arrived yet."
         );
 
+        string memory requestNickname = UserInfo[msg.sender].nickname;
+        Request memory TradeInfo = Trade[tokenId];
+
         require(
-            keccak256(abi.encodePacked(UserInfo[msg.sender].nickname)) ==
-                keccak256(abi.encodePacked(Trade[tokenId].buyer)),
+            keccak256(abi.encodePacked(requestNickname)) ==
+                keccak256(abi.encodePacked(TradeInfo.buyer)),
             "Caller is not the buyer."
         );
 
-        address payable _sellerAddress = Trade[tokenId].sellerAddress;
-        address payable _buyerAddress = Trade[tokenId].buyerAddress;
+        address payable _sellerAddress = TradeInfo.sellerAddress;
+        address payable _buyerAddress = TradeInfo.buyerAddress;
 
         // Change phase
-        Trade[tokenId].phase = Phase.done;
+        TradeInfo.phase = Phase.done;
 
         // Seller nickname
-        string memory _seller = Trade[tokenId].seller;
+        string memory _seller = TradeInfo.seller;
+
+        (uint128 _usedBLI, uint128 price) = decode(TradeInfo.hash);
 
         // estimateFee
-        uint256 _fee = estimateFee(tokenId);
+        uint256 _fee = estimateFee(tokenId) - _usedBLI;
 
         // Get fee
         FeeRevenues += _fee;
 
-        (uint128 _usedBLI, uint128 price) = decode(Trade[tokenId].hash);
-
         // Transfer price to seller
         payable(_sellerAddress).transfer(price - _fee);
 
+        // Burn BLI Token
+        _burn(_sellerAddress, BLI, _usedBLI);
+
         // Update Phase
-        TradeLogTable[UserInfo[msg.sender].nickname][index].phase = Phase.done;
+        TradeLogTable[requestNickname][index].phase = Phase.done;
         TradeLogTable[_seller][index].phase = Phase.done;
 
         // Mint Blind Token to buyer and seller
@@ -499,19 +510,18 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
             payable(_sellerAddress),
             tokenId
         );
-        mintBlindToken(payable(_buyerAddress), AmountOfBuyer);
-        mintBlindToken(payable(_sellerAddress), AmountOfSeller);
+        _mintBlindToken(payable(_buyerAddress), AmountOfBuyer);
+        _mintBlindToken(payable(_sellerAddress), AmountOfSeller);
 
         // Set users grade point
         UserInfo[_sellerAddress].gradePoint += 1000;
         UserInfo[_buyerAddress].gradePoint += 1000;
 
         // Update users grade
-        updateUserGrade(_sellerAddress);
-        updateUserGrade(_buyerAddress);
+        _updateUserGrade(_sellerAddress);
+        _updateUserGrade(_buyerAddress);
 
         emit FinishPurchaseRequest(tokenId, _buyerAddress, _sellerAddress);
-        return true;
     }
 
     // 구매 취소 : 거래가 취소되어 상태를 Canceled 상태로 바꾸고 NFT 토큰은 unlock
@@ -519,33 +529,35 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         public
         payable
         isApproved
-        returns (bool)
+        
     {
-        require(Trade[tokenId].phase != Phase.invalid);
+        Request memory TradeInfo = Trade[tokenId];
+        string memory requestNickname = UserInfo[msg.sender].nickname;
+
+        require(TradeInfo.phase != Phase.invalid);
 
         require(
-            keccak256(abi.encodePacked(Trade[tokenId].seller)) ==
-                keccak256(abi.encodePacked(UserInfo[msg.sender].nickname)) ||
-                keccak256(abi.encodePacked(Trade[tokenId].buyer)) ==
-                keccak256(abi.encodePacked(UserInfo[msg.sender].nickname))
+            keccak256(abi.encodePacked(TradeInfo.seller)) ==
+                keccak256(abi.encodePacked(requestNickname)) ||
+                keccak256(abi.encodePacked(TradeInfo.buyer)) ==
+                keccak256(abi.encodePacked(requestNickname))
         );
 
         // Change phase
         Trade[tokenId].phase = Phase.invalid;
 
         // Seller nickname
-        string memory _seller = Trade[tokenId].seller;
-        string memory _buyer = Trade[tokenId].buyer;
+        string memory _seller = TradeInfo.seller;
+        string memory _buyer = TradeInfo.buyer;
 
         TradeLogTable[_buyer][index].phase = Phase.canceled;
         TradeLogTable[_seller][index].phase = Phase.canceled;
 
         // Unlock Token
         Unlock(tokenId);
-        
-        (uint128 _usedBLI, uint128 price) = decode(Trade[tokenId].hash);
-        payable(msg.sender).transfer(price);
 
-        return true;
+        (uint128 _usedBLI, uint128 price) = decode(TradeInfo.hash);
+        _usedBLI = 0;
+        payable(msg.sender).transfer(price);
     }
 }
