@@ -34,6 +34,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         address indexed seller
     );
 
+    /* Variables */
     // Governance Token
     uint256 public constant BLI = 0;
 
@@ -55,6 +56,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         _tokenIdCounter.increment();
     }
 
+    /* Enumerates */
     // Enum for user grade
     enum Grade {
         invalid,
@@ -77,6 +79,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         canceled
     }
 
+    /* Structures */
     // Struct for store user data
     struct UserData {
         uint256 gradePoint;
@@ -95,6 +98,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         string seller;
     }
 
+    /* Mapping Table */
     // Lock status of each NFT Token for product
     mapping(uint256 => bool) MutexLockStatus;
 
@@ -110,45 +114,12 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     // Mapping for tokenID and token URI
     mapping(uint256 => string) private tokenURIs;
 
+    /* Modifiers */
     // Check if the token is locked.
     modifier isLocked(uint256 tokenId) {
         require(MutexLockStatus[tokenId] == true, "This token was locked");
 
         _;
-    }
-
-    // Set tokenURI
-    function _setURI(uint256 tokenId, string memory tokenURI) internal {
-        tokenURIs[tokenId] = tokenURI;
-        emit URI(uri(tokenId), tokenId);
-    }
-
-    // get tokenURI
-    function getTokenURI(uint256 tokenId) public view returns (string memory) {
-        return tokenURIs[tokenId];
-    }
-
-    function _beforeTokenTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal override(ERC1155, ERC1155Supply) {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-    }
-
-    //  NFT token lock
-    function Lock(uint256 tokenId) private {
-        if (MutexLockStatus[tokenId] == true) return;
-        MutexLockStatus[tokenId] = true;
-    }
-
-    // NFT token unlock
-    function Unlock(uint256 tokenId) private {
-        if (MutexLockStatus[tokenId] == false) return;
-        MutexLockStatus[tokenId] = false;
     }
 
     // Check if msg.sender approved contract.
@@ -171,40 +142,11 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         _;
     }
 
-    // Mint NFT
-    // function mintNFT(
-    //     address account,
-    //     uint256 id,
-    //     uint256 amount,
-    //     bytes memory data
-    // ) internal {
-    //     _mint(account, id, amount, data);
-    // }
-
-    // Mint NFT Token for product
-    function mintProduct(string memory uri) public isApproved {
-        require(UserInfo[msg.sender].grade != Grade.invalid);
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _mint(msg.sender, tokenId, 1, "");
-        // mintNFT(msg.sender, tokenId, 1, "");
-        _setURI(tokenId, uri);
-    }
-
-    // Estimate amount of Blind token should be minted by user grade and trade price.
-    function estimateAmountOfBLI(address user, uint256 tokenId)
-        public
-        view
-        isApproved
-        returns (uint256)
-    {
-        (uint128 _usedBLI, uint128 _price) = decode(Trade[tokenId].hash);
-        _usedBLI = 0;
-
-        return (_price * getRatioByGrade(UserInfo[user].grade)) / 100000;
-        // return
-        //     (Trade[tokenId].price * getRatioByGrade(UserInfo[user].grade)) /
-        //     100000;
+    /* Internal functions */
+    // Set tokenURI
+    function _setURI(uint256 tokenId, string memory tokenURI) internal {
+        tokenURIs[tokenId] = tokenURI;
+        emit URI(uri(tokenId), tokenId);
     }
 
     // Mint Blind token by user grade and trade price.
@@ -213,67 +155,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         isApproved
     {
         _mint(user, BLI, amount, "");
-        // mintNFT(user, BLI, amount, "");
-    }
-
-    // Get fee ratio by user grade.
-    function getRatioByGrade(Grade grade)
-        public
-        pure
-        returns (uint256)
-    {
-        if (grade == Grade.noob) {
-            return NOOB_FEE_RATIO;
-        } else if (grade == Grade.rookie) {
-            return ROOKIE_FEE_RATIO;
-        } else if (grade == Grade.member) {
-            return MEMBER_FEE_RATIO;
-        } else if (grade == Grade.bronze) {
-            return BRONZE_FEE_RATIO;
-        } else if (grade == Grade.silver) {
-            return SILVER_FEE_RATIO;
-        } else if (grade == Grade.gold) {
-            return GOLD_FEE_RATIO;
-        } else if (grade == Grade.platinum) {
-            return PLATINUM_FEE_RATIO;
-        } else if (grade == Grade.diamond) {
-            return DIAMOND_FEE_RATIO;
-        }
-        return NOOB_FEE_RATIO;
-    }
-
-    // Estimate total fee
-    function estimateFee(uint256 tokenId)
-        public
-        view
-        isApproved
-        walletOwnerOrAdmin(msg.sender)
-        returns (uint256)
-    {
-        Request memory TradeInfo = Trade[tokenId];
-
-        // Must exist in trade table.
-        require(
-            TradeInfo.phase != Phase.invalid,
-            "Must exist in trade table"
-        );
-
-        Grade _sellerGrade = UserInfo[msg.sender].grade;
-        uint256 _feeRatio = getRatioByGrade(_sellerGrade);
-
-        (uint128 usedBLI, uint128 _price) = decode(TradeInfo.hash);
-        usedBLI = 0;
-
-        return (_price * _feeRatio) / 100;
-        // return (Trade[tokenId].price * _feeRatio) / 100;
-    }
-
-    // Set user data into UserInfo storage.
-    function setUserInfo(string memory nickname) public isApproved {
-        require(UserInfo[msg.sender].grade == Grade.invalid);
-
-        UserInfo[msg.sender].nickname = nickname;
-        UserInfo[msg.sender].grade = Grade.noob;
     }
 
     // Update user grade.
@@ -309,34 +190,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         }
     }
 
-    // Update user nickname.
-    function updateUserNickname(string memory nickname)
-        public
-        walletOwnerOrAdmin(msg.sender)
-    {
-        UserInfo[msg.sender].nickname = nickname;
-    }
-
-    // Show user information
-    function showUserInfo() public view isApproved returns (UserData memory) {
-        return UserInfo[msg.sender];
-    }
-
-    // Show trade information
-    function showTradeInfo(uint256 tokenId)
-        public
-        view
-        isApproved
-        returns (Request memory)
-    {
-        return Trade[tokenId];
-    }
-
-    // Show trade history for user
-    function showTradeLog() public view isApproved returns (Request[] memory) {
-        return TradeLogTable[UserInfo[msg.sender].nickname];
-    }
-
     // Encodes "usedBLI" and "price" as "bytes32 hash".
     function encode(uint128 _usedBLI, uint128 _price)
         internal
@@ -361,6 +214,140 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
             mstore(0x16, x)
             usedBLI := mload(0)
         }
+    }
+
+    /* View functions */
+    // get tokenURI
+    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+        return tokenURIs[tokenId];
+    }
+
+    // Estimate amount of Blind token should be minted by user grade and trade price.
+    function estimateAmountOfBLI(address user, uint256 tokenId)
+        public
+        view
+        isApproved
+        returns (uint256)
+    {
+        (uint128 _usedBLI, uint128 _price) = decode(Trade[tokenId].hash);
+        _usedBLI = 0;
+
+        return (_price * getRatioByGrade(UserInfo[user].grade)) / 100000;
+        // return
+        //     (Trade[tokenId].price * getRatioByGrade(UserInfo[user].grade)) /
+        //     100000;
+    }
+
+    // Estimate total fee
+    function estimateFee(uint256 tokenId)
+        public
+        view
+        isApproved
+        walletOwnerOrAdmin(msg.sender)
+        returns (uint256)
+    {
+        Request memory TradeInfo = Trade[tokenId];
+
+        // Must exist in trade table.
+        require(
+            TradeInfo.phase != Phase.invalid,
+            "Must exist in trade table"
+        );
+
+        Grade _sellerGrade = UserInfo[msg.sender].grade;
+        uint256 _feeRatio = getRatioByGrade(_sellerGrade);
+
+        (uint128 usedBLI, uint128 _price) = decode(TradeInfo.hash);
+        usedBLI = 0;
+
+        return (_price * _feeRatio) / 100;
+        // return (Trade[tokenId].price * _feeRatio) / 100;
+    }
+
+    // Show user information
+    function showUserInfo() public view isApproved returns (UserData memory) {
+        return UserInfo[msg.sender];
+    }
+
+    // Show trade information
+    function showTradeInfo(uint256 tokenId)
+        public
+        view
+        isApproved
+        returns (Request memory)
+    {
+        return Trade[tokenId];
+    }
+
+    // Show trade history for user
+    function showTradeLog() public view isApproved returns (Request[] memory) {
+        return TradeLogTable[UserInfo[msg.sender].nickname];
+    }
+
+    /* Private functions */
+    //  NFT token lock
+    function Lock(uint256 tokenId) private {
+        if (MutexLockStatus[tokenId] == true) return;
+        MutexLockStatus[tokenId] = true;
+    }
+
+    // NFT token unlock
+    function Unlock(uint256 tokenId) private {
+        if (MutexLockStatus[tokenId] == false) return;
+        MutexLockStatus[tokenId] = false;
+    }
+
+    /* Public functions */
+    // Mint NFT Token for product
+    function mintProduct(string memory uri) public isApproved {
+        require(UserInfo[msg.sender].grade != Grade.invalid);
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _mint(msg.sender, tokenId, 1, "");
+        // mintNFT(msg.sender, tokenId, 1, "");
+        _setURI(tokenId, uri);
+    }
+
+    // Get fee ratio by user grade.
+    function getRatioByGrade(Grade grade)
+        public
+        pure
+        returns (uint256)
+    {
+        if (grade == Grade.noob) {
+            return NOOB_FEE_RATIO;
+        } else if (grade == Grade.rookie) {
+            return ROOKIE_FEE_RATIO;
+        } else if (grade == Grade.member) {
+            return MEMBER_FEE_RATIO;
+        } else if (grade == Grade.bronze) {
+            return BRONZE_FEE_RATIO;
+        } else if (grade == Grade.silver) {
+            return SILVER_FEE_RATIO;
+        } else if (grade == Grade.gold) {
+            return GOLD_FEE_RATIO;
+        } else if (grade == Grade.platinum) {
+            return PLATINUM_FEE_RATIO;
+        } else if (grade == Grade.diamond) {
+            return DIAMOND_FEE_RATIO;
+        }
+        return NOOB_FEE_RATIO;
+    }
+
+    // Set user data into UserInfo storage.
+    function setUserInfo(string memory nickname) public isApproved {
+        require(UserInfo[msg.sender].grade == Grade.invalid);
+
+        UserInfo[msg.sender].nickname = nickname;
+        UserInfo[msg.sender].grade = Grade.noob;
+    }
+
+    // Update user nickname.
+    function updateUserNickname(string memory nickname)
+        public
+        walletOwnerOrAdmin(msg.sender)
+    {
+        UserInfo[msg.sender].nickname = nickname;
     }
 
     // 구매 단계 (1) : NFT Token을 잠그고 Pending 상태로 바꿔줌
