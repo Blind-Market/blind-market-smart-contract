@@ -150,10 +150,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     }
 
     // Mint Blind token by user grade and trade price.
-    function _mintBlindToken(address user, uint256 amount)
-        internal
-        isApproved
-    {
+    function _mintBlindToken(address user, uint256 amount) internal isApproved {
         _mint(user, BLI, amount, "");
     }
 
@@ -216,8 +213,20 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         }
     }
 
+    // override _beforeTokenTransfer to prevent conflict
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal override(ERC1155, ERC1155Supply) {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
     /* View functions */
-    // get tokenURI
+    // Get tokenURI
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
         return tokenURIs[tokenId];
     }
@@ -249,10 +258,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         Request memory TradeInfo = Trade[tokenId];
 
         // Must exist in trade table.
-        require(
-            TradeInfo.phase != Phase.invalid,
-            "Must exist in trade table"
-        );
+        require(TradeInfo.phase != Phase.invalid, "Must exist in trade table");
 
         Grade _sellerGrade = UserInfo[msg.sender].grade;
         uint256 _feeRatio = getRatioByGrade(_sellerGrade);
@@ -309,11 +315,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     }
 
     // Get fee ratio by user grade.
-    function getRatioByGrade(Grade grade)
-        public
-        pure
-        returns (uint256)
-    {
+    function getRatioByGrade(Grade grade) public pure returns (uint256) {
         if (grade == Grade.noob) {
             return NOOB_FEE_RATIO;
         } else if (grade == Grade.rookie) {
@@ -382,7 +384,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
 
         TradeLogTable[buyer].push(Trade[tokenId]);
         TradeLogTable[seller].push(Trade[tokenId]);
-
     }
 
     // 구매 단계 (2) : 판매 물품이 배송되고 있다는 Shipping 상태로 바꿔줌
@@ -390,7 +391,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         uint256 tokenId,
         uint256 index,
         uint128 usedBLI
-    ) public isApproved  {
+    ) public isApproved {
         // Buyer Nickname
         string memory _seller = UserInfo[msg.sender].nickname;
         string memory _buyer = UserInfo[Trade[tokenId].buyerAddress].nickname;
@@ -415,7 +416,7 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         // Inputed BLI must be less than fee
         uint256 _fee = estimateFee(tokenId);
         require(usedBLI <= _fee, "Inputed BLI must be less than fee");
- 
+
         // Change phase
         Trade[tokenId].phase = Phase.shipping;
 
@@ -445,7 +446,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         public
         payable
         isApproved
-        
     {
         require(
             Trade[tokenId].phase == Phase.shipping,
@@ -516,7 +516,6 @@ contract BLIND is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
         public
         payable
         isApproved
-        
     {
         Request memory TradeInfo = Trade[tokenId];
         string memory requestNickname = UserInfo[msg.sender].nickname;
