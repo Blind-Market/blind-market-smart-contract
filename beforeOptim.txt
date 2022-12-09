@@ -1,0 +1,325 @@
+
+status	true Transaction mined and execution succeed
+transaction hash	0x49956f664bf42339745083d442c5e49a7058e6e72288e300b61208cbf3947500
+from	0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+to	BLIND.(constructor)
+gas	4478195 gas
+transaction cost	3894082 gas 
+execution cost	3894082 gas 
+input	0x608...70033
+decoded input	{}
+decoded output	 - 
+logs	[
+	{
+		"from": "0xfC01E11F9eC3E3D3831C010227D84Fa3E65b2FFB",
+		"topic": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+		"event": "OwnershipTransferred",
+		"args": {
+			"0": "0x0000000000000000000000000000000000000000",
+			"1": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"previousOwner": "0x0000000000000000000000000000000000000000",
+			"newOwner": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2"
+		}
+	}
+]
+val	0 wei
+creation of BLIND pending...
+[vm]from: 0x5B3...eddC4to: BLIND.(constructor)value: 0 weidata: 0x608...70033logs: 1hash: 0xe84...0c8e0
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0xe84508fc97673fa822d1c80aa33c57281d5e06723938222149262f60a590c8e0
+from	0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+to	BLIND.(constructor)
+gas	4478195 gas
+transaction cost	3894082 gas 
+execution cost	3894082 gas 
+input	0x608...70033
+decoded input	{}
+decoded output	 - 
+logs	[
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+		"event": "OwnershipTransferred",
+		"args": {
+			"0": "0x0000000000000000000000000000000000000000",
+			"1": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"previousOwner": "0x0000000000000000000000000000000000000000",
+			"newOwner": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
+		}
+	}
+]
+val	0 wei
+transact to BLIND.setApprovalForAll pending ... 
+[vm]from: 0x5B3...eddC4to: BLIND.setApprovalForAll(address,bool) 0xD4F...2cbeevalue: 0 weidata: 0xa22...00001logs: 1hash: 0x76e...f7db0
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0x76ed71b887e7a2e7cbeb5d46a026f042944a55ed0797780c859b6620a12f7db0
+from	0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+to	BLIND.setApprovalForAll(address,bool) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	53211 gas
+transaction cost	46270 gas 
+execution cost	46270 gas 
+input	0xa22...00001
+decoded input	{
+	"address operator": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+	"bool approved": true
+}
+decoded output	{}
+logs	[
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
+		"event": "ApprovalForAll",
+		"args": {
+			"0": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"1": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+			"2": true,
+			"account": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"operator": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+			"approved": true
+		}
+	}
+]
+val	0 wei
+transact to BLIND.setUserInfo pending ... 
+[vm]from: 0x5B3...eddC4to: BLIND.setUserInfo(string) 0xD4F...2cbeevalue: 0 weidata: 0x9b3...00000logs: 0hash: 0x0b8...b5049
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0x0b8e23679e03c8011762a1b8212058fb287ab8291b851956cdadc7e06dbb5049
+from	0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+to	BLIND.setUserInfo(string) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	80015 gas
+transaction cost	69578 gas 
+execution cost	69578 gas 
+input	0x9b3...00000
+decoded input	{
+	"string nickname": "admin"
+}
+decoded output	{}
+logs	[]
+val	0 wei
+transact to BLIND.mintProduct pending ... 
+[vm]from: 0x5B3...eddC4to: BLIND.mintProduct(string) 0xD4F...2cbeevalue: 0 weidata: 0x53b...00000logs: 2hash: 0xdd9...52378
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0xdd99b96a416a6263410518b8d1565042fa41ada98a6176492086a2a1cb652378
+from	0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+to	BLIND.mintProduct(string) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	123884 gas
+transaction cost	107725 gas 
+execution cost	107725 gas 
+input	0x53b...00000
+decoded input	{
+	"string uri": "asdf"
+}
+decoded output	{}
+logs	[
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62",
+		"event": "TransferSingle",
+		"args": {
+			"0": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"1": "0x0000000000000000000000000000000000000000",
+			"2": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"3": "1",
+			"4": "1",
+			"operator": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"from": "0x0000000000000000000000000000000000000000",
+			"to": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"id": "1",
+			"value": "1"
+		}
+	},
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0x6bb7ff708619ba0610cba295a58592e0451dee2622938c8755667688daf3529b",
+		"event": "URI",
+		"args": {
+			"0": "http://BlindMarket.xyz/{id}.json",
+			"1": "1",
+			"value": "http://BlindMarket.xyz/{id}.json",
+			"id": "1"
+		}
+	}
+]
+val	0 wei
+transact to BLIND.setApprovalForAll pending ... 
+[vm]from: 0xAb8...35cb2to: BLIND.setApprovalForAll(address,bool) 0xD4F...2cbeevalue: 0 weidata: 0xa22...00001logs: 1hash: 0x2ee...30c0b
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0x2ee81496bf154456a8c46a59d44d32a3a9bd5eb4a064057a359219f9b4930c0b
+from	0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+to	BLIND.setApprovalForAll(address,bool) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	53211 gas
+transaction cost	46270 gas 
+execution cost	46270 gas 
+input	0xa22...00001
+decoded input	{
+	"address operator": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+	"bool approved": true
+}
+decoded output	{}
+logs	[
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
+		"event": "ApprovalForAll",
+		"args": {
+			"0": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"1": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+			"2": true,
+			"account": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"operator": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+			"approved": true
+		}
+	}
+]
+val	0 wei
+transact to BLIND.setUserInfo pending ... 
+[vm]from: 0xAb8...35cb2to: BLIND.setUserInfo(string) 0xD4F...2cbeevalue: 0 weidata: 0x9b3...00000logs: 0hash: 0xb1f...36f5e
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0xb1ff3143e89c50d3bf936c242255a718e8fa2e573120d46cc67ca2e2ebf36f5e
+from	0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+to	BLIND.setUserInfo(string) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	80001 gas
+transaction cost	69566 gas 
+execution cost	69566 gas 
+input	0x9b3...00000
+decoded input	{
+	"string nickname": "user"
+}
+decoded output	{}
+logs	[]
+val	0 wei
+transact to BLIND.turnIntoPending pending ... 
+[vm]from: 0xAb8...35cb2to: BLIND.turnIntoPending(uint256,uint128,string,address) 0xD4F...2cbeevalue: 0 weidata: 0xd86...00000logs: 0hash: 0x309...b0518
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0x3093f75625be3f6913287a7f965a00d549f396f7faf21f7cb7492a19657b0518
+from	0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+to	BLIND.turnIntoPending(uint256,uint128,string,address) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	506288 gas
+transaction cost	440250 gas 
+execution cost	440250 gas 
+input	0xd86...00000
+decoded input	{
+	"uint256 tokenId": "1",
+	"uint128 price": "10",
+	"string seller": "admin",
+	"address sellerAddress": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
+}
+decoded output	{
+	"0": "bool: true"
+}
+logs	[]
+val	0 wei
+transact to BLIND.turnIntoShipping pending ... 
+[vm]from: 0x5B3...eddC4to: BLIND.turnIntoShipping(uint256,uint256,uint128) 0xD4F...2cbeevalue: 0 weidata: 0xb94...00000logs: 1hash: 0x9e4...a9cd3
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0x9e4590a88cf237a14dad9870b4be9a8836843788922d962e7708476c0dfa9cd3
+from	0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+to	BLIND.turnIntoShipping(uint256,uint256,uint128) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	109926 gas
+transaction cost	90787 gas 
+execution cost	90787 gas 
+input	0xb94...00000
+decoded input	{
+	"uint256 tokenId": "1",
+	"uint256 index": "0",
+	"uint128 usedBLI": "0"
+}
+decoded output	{
+	"0": "bool: true"
+}
+logs	[
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62",
+		"event": "TransferSingle",
+		"args": {
+			"0": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"1": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"2": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"3": "1",
+			"4": "1",
+			"operator": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"from": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"to": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"id": "1",
+			"value": "1"
+		}
+	}
+]
+val	0 wei
+transact to BLIND.turnIntoDone pending ... 
+[vm]from: 0xAb8...35cb2to: BLIND.turnIntoDone(uint256,uint256) 0xD4F...2cbeevalue: 10000000000 weidata: 0x385...00000logs: 3hash: 0xd39...6d4e0
+Debug
+status	true Transaction mined and execution succeed
+transaction hash	0xd39464c80e7522f977be3edf09793eecbdc0746feb8d39e42421bfe27f36d4e0
+from	0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+to	BLIND.turnIntoDone(uint256,uint256) 0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee
+gas	184761 gas
+transaction cost	160661 gas 
+execution cost	160661 gas 
+input	0x385...00000
+decoded input	{
+	"uint256 tokenId": "1",
+	"uint256 index": "0"
+}
+decoded output	{
+	"0": "bool: true"
+}
+logs	[
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62",
+		"event": "TransferSingle",
+		"args": {
+			"0": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"1": "0x0000000000000000000000000000000000000000",
+			"2": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"3": "0",
+			"4": "0",
+			"operator": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"from": "0x0000000000000000000000000000000000000000",
+			"to": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"id": "0",
+			"value": "0"
+		}
+	},
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62",
+		"event": "TransferSingle",
+		"args": {
+			"0": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"1": "0x0000000000000000000000000000000000000000",
+			"2": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"3": "0",
+			"4": "0",
+			"operator": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"from": "0x0000000000000000000000000000000000000000",
+			"to": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"id": "0",
+			"value": "0"
+		}
+	},
+	{
+		"from": "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee",
+		"topic": "0x6516606757f8273d99c7742bbfbb61c253cd67ebd5a71cbcf18e618517c2355f",
+		"event": "FinishPurchaseRequest",
+		"args": {
+			"0": "1",
+			"1": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"2": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+			"tokenId": "1",
+			"buyer": "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+			"seller": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
+		}
+	}
+]
+val	10000000000 wei
